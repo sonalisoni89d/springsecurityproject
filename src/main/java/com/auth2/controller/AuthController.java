@@ -1,9 +1,11 @@
 package com.auth2.controller;
 
 import com.auth2.dto.APIResponse;
+import com.auth2.dto.ErrorDto;
 import com.auth2.dto.LoginDto;
 import com.auth2.dto.UserDto;
 import com.auth2.service.AuthService;
+import com.auth2.service.JWTService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private final AuthService authService;
     private final AuthenticationManager manager;
+    private final JWTService jwtService;
     @PostMapping("/register")
     public ResponseEntity<APIResponse<String>> register(@RequestBody UserDto userDto){
         APIResponse<String> save = authService.register(userDto);
@@ -29,10 +32,12 @@ public class AuthController {
        try{
            Authentication authenticate = manager.authenticate(token);//toke->manager->provider
            if(authenticate.isAuthenticated()){
+               String jwtToken=jwtService.generateToken(loginDto.getUsername(),
+                       authenticate.getAuthorities().iterator().next().getAuthority());
                APIResponse<String> success=APIResponse.<String>builder()
                        .message("Login successful")
                        .status(200)
-                       .data("User is logged in")
+                       .data(jwtToken)
                        .build();
                return new ResponseEntity<>(success,HttpStatusCode.valueOf(success.getStatus()));
            }
@@ -51,4 +56,15 @@ public class AuthController {
     public String welcome(){
         return "welcome";
     }
+//    //http://localhost:8080/api/v1/auth/3
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<APIResponse<String>> deleteRecord(@PathVariable Long id){
+//        authService.deleteRegistration(id);
+//        APIResponse<String> delete=APIResponse.<String>builder()
+//                .message("Deleted")
+//                .status(200)
+//                .data("Data deleted")
+//                .build();
+//        return new ResponseEntity<>(delete,HttpStatusCode.valueOf(delete.getStatus()));
+//    }
 }

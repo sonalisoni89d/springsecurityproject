@@ -9,6 +9,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -40,4 +42,10 @@ public class AuthService {
                 .data("success")
                 .build();
     }
+//    public void deleteRegistration(Long id){
+//        Optional<User> byId = userRepository.findById(id);
+//        if (byId.isPresent()){
+//            userRepository.deleteById(id);
+//        }else throw new RuntimeException("No record found with id :"+id);
+//    }
 }

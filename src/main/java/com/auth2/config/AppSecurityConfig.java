@@ -14,43 +14,51 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class AppSecurityConfig {
     private final CustomerUserDetailsService service;
-    String publicEndpoints[]={
+    private final JwtFilter filter;
+    String publicEndpoints[] = {
             "/api/v1/auth/register",
-            "/api/v1/auth/login"
+            "/api/v1/auth/login",
+            "/api/v1/auth/welcome"
     };
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-                .csrf(csrf-> csrf.disable())
-                .cors(cors->cors.disable())
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.disable())
                 .authenticationProvider(provider())
                 .authorizeHttpRequests(
-                        request->{request
-                                .requestMatchers(publicEndpoints).permitAll()
-                                .requestMatchers("/api/v1/admin/welcome").hasAnyRole("ADMIN","USER","SONALI")
-                                .anyRequest().authenticated();
-        }
-        ).httpBasic(Customizer.withDefaults());
+                        request -> {
+                            request
+                                    .requestMatchers(publicEndpoints).permitAll()
+                                    .requestMatchers("/api/v1/auth/welcome").hasAnyRole("ADMIN", "USER", "SONALI")
+                                    .anyRequest().authenticated();
+                        }
+                ).authenticationProvider(provider())
+                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
+
     @Bean
-    public AuthenticationProvider provider(){
-        DaoAuthenticationProvider provider=new DaoAuthenticationProvider();
+    public AuthenticationProvider provider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(service);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;

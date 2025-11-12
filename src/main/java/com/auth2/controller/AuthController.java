@@ -26,6 +26,7 @@ public class AuthController {
         APIResponse<String> save = authService.register(userDto);
         return new ResponseEntity<>(save, HttpStatusCode.valueOf(save.getStatus()));
     }
+//    http://localhost:8080/api/v1/auth/login
     @PostMapping("/login")
     public ResponseEntity<APIResponse<String>> loginCheck(@RequestBody LoginDto loginDto){
         UsernamePasswordAuthenticationToken token=new UsernamePasswordAuthenticationToken(loginDto.getUsername(),loginDto.getPassword());

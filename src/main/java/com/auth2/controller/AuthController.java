@@ -4,6 +4,8 @@ import com.auth2.dto.APIResponse;
 import com.auth2.dto.ErrorDto;
 import com.auth2.dto.LoginDto;
 import com.auth2.dto.UserDto;
+import com.auth2.entity.User;
+import com.auth2.repository.UserRepository;
 import com.auth2.service.AuthService;
 import com.auth2.service.JWTService;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,8 @@ public class AuthController {
     private final AuthService authService;
     private final AuthenticationManager manager;
     private final JWTService jwtService;
+    private UserRepository userRepository;
+//    http://localhost:8080/api/v1/auth/register
     @PostMapping("/register")
     public ResponseEntity<APIResponse<String>> register(@RequestBody UserDto userDto){
         APIResponse<String> save = authService.register(userDto);
@@ -31,7 +35,7 @@ public class AuthController {
     public ResponseEntity<APIResponse<String>> loginCheck(@RequestBody LoginDto loginDto){
         UsernamePasswordAuthenticationToken token=new UsernamePasswordAuthenticationToken(loginDto.getUsername(),loginDto.getPassword());
        try{
-           Authentication authenticate = manager.authenticate(token);//toke->manager->provider
+           Authentication authenticate = manager.authenticate(token);//token->manager->provider
            if(authenticate.isAuthenticated()){
                String jwtToken=jwtService.generateToken(loginDto.getUsername(),
                        authenticate.getAuthorities().iterator().next().getAuthority());
@@ -53,6 +57,7 @@ public class AuthController {
                 .build();
         return new ResponseEntity<>(failed,HttpStatusCode.valueOf(failed.getStatus()));
     }
+//    http://localhost:8080/api/v1/auth/welcome
     @GetMapping("/welcome")
     public String welcome(){
         return "welcome";
@@ -68,4 +73,8 @@ public class AuthController {
 //                .build();
 //        return new ResponseEntity<>(delete,HttpStatusCode.valueOf(delete.getStatus()));
 //    }
+    @GetMapping("/getUser")
+    public User getUserByName(@RequestParam String username){
+        return userRepository.findByUsername(username);
+    }
 }

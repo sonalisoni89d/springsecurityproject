@@ -1,0 +1,13 @@
+#spring:
+#  application:
+#    name: micro1
+#  cloud:
+#    gateway:
+#      mvc:
+#        routes:
+#          - id: microservice-api-1
+#
+#
+#
+#server:
+#  port: 8080
